@@ -1,6 +1,6 @@
 const express = require('express')
 const userRouter = require('./Routes/userRoutes')
-const authRouter = require('./Routes/1auth')
+const authRouter = require('./Routes/auth')
 
 
 
@@ -13,7 +13,7 @@ const app = express()
 
 app.use(express.json())
 
-app.use('/f', userRouter)
-app.use('/', authRouter)
+app.use('/', userRouter)
+app.use('/auth', authRouter)
  
 app.listen(PORT)
