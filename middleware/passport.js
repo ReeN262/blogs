@@ -11,11 +11,10 @@ module.exports = passport => {
     passport.use(
         new JwtStrategy(opts, async (payload, done) => {
             try {
-                console.log(payload.userID)
-                const user = await db.query('select email,id_user from person where id_user = $1', [payload.userID])
-        
+                const user = await db.query('select email,name from users where email = $1', [payload.email])
                 if (user.rowCount != 0) {
-                    done(null, user.rows)
+                    done(null, {name: user.rows.name, 
+                    email: user.rows.email})
                 } else {
                     done(null, false)
                 }
