@@ -8,6 +8,7 @@ class UserController {
     }
     async getUser(req, res){
     const id = req.params.id
+    console.log(id)
     const user = await bd.query('SELECT * FROM person where id_user = $1', [id])
     res.json(user.rows[0])    
     }

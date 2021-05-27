@@ -1,6 +1,8 @@
 const express = require('express')
 const userRouter = require('./Routes/userRoutes')
-const authRouter = require('./Routes/auth')
+const authRouter = require('./Routes/auth');
+const passport = require('passport');
+
 
 
 
@@ -13,7 +15,9 @@ const app = express()
 
 app.use(express.json())
 
+app.use(passport.initialize())
+require('./middleware/passport')(passport)
 app.use('/', userRouter)
-app.use('/auth', authRouter)
+app.use('/auth',authRouter)
  
 app.listen(PORT)
