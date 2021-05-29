@@ -10,27 +10,28 @@ create TABLE post(
     content VARCHAR,
     create_date DATE,
     update_date DATE,
+    img VARCHAR, (пока что с одний картинкой)
     userID INTEGER,
     FOREIGN KEY (userID) REFERENCES users (id)
 );
-create TABLE img(
-    id SERIAL PRIMARY KEY,
-    postID INTEGER,
-    img VARCHAR,
-    FOREIGN KEY (postID) REFERENCES post (id)
-);
+-- create TABLE img(
+--     id SERIAL PRIMARY KEY,
+--     postID INTEGER,
+--     img VARCHAR,
+--     FOREIGN KEY (postID) REFERENCES post (id)
+-- );
 create TABLE comments(
     id SERIAL PRIMARY KEY,
     userID INTEGER,
     content VARCHAR(255),
     postID INTEGER,
-    FOREIGN KEY (postID) REFERENCES post (id)
+    FOREIGN KEY (postID) REFERENCES post (id),
     FOREIGN KEY (userID) REFERENCES users (id) 
 );
 create TABLE likes(
     id SERIAL PRIMARY KEY,
     userID INTEGER,
     postID INTEGER,
-    FOREIGN KEY (postID) REFERENCES post (id)
+    FOREIGN KEY (postID) REFERENCES post (id),
     FOREIGN KEY (userID) REFERENCES users (id) 
 );

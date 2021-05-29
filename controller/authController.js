@@ -1,8 +1,8 @@
-const db = require('../db')
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const { secret } = require('../config/secretkey')
 const { validationResult } = require('express-validator');
+const db = require('../database/db')
+const { secret } = require('../config/secretkey')
 
 
 class authUser {
