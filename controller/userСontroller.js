@@ -15,7 +15,7 @@ class UserController {
             const {password} = req.body
             let hashPassword = await bcrypt.hashSync(password, 10);
             await db.query('UPDATE users SET password = $1 where id = $2 RETURNING *', [hashPassword, req.user.id])
-            res.status(200).json({success: true, message: "Пароль изменен"})   
+            res.status(200).json({success: true})   
         } catch(e) {
             return res.status(500).json(e)
         }
@@ -31,7 +31,7 @@ class UserController {
         try {
             if (req.user.id != null) {
                 await bd.query('DELETE FROM users where id = $1', [req.user.id])
-                res.status(200).json({success: true, message: 'Пользователь удален'})  
+                res.status(200).json({success: true})  
             } else {
                 res.status(400).json({success: false, errorMessage: 'Пользователь не найден'})
             }

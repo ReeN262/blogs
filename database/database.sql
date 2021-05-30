@@ -6,11 +6,11 @@ create TABLE users(
 );
 create TABLE post(
     id SERIAL PRIMARY KEY,
-    title VARCHAR(50),
+    title VARCHAR(200),
     content VARCHAR,
-    create_date DATE,
-    update_date DATE,
-    img VARCHAR, (пока что с одний картинкой)
+    create_date timestamp,
+    update_date timestamp,
+    img VARCHAR, 
     userID INTEGER,
     FOREIGN KEY (userID) REFERENCES users (id)
 );

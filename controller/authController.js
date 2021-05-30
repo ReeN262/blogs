@@ -20,7 +20,7 @@ class authUser {
             const Email = await db.query("select email from users where email = $1", [email])
             if (Email.rowCount == 0) {
                 await db.query('INSERT INTO users(name, password, email) values($1, $2, $3) RETURNING *', [name, hashPassword, email])
-                return res.status(200).json({success: true, message: "Пользователь зарегистрирован"})
+                return res.status(200).json({success: true})
             } else {
                 return res.status(400).json({success: false, errorMessage: "Почта уже зарегистрирована"})
             }
