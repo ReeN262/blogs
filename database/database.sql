@@ -14,12 +14,7 @@ create TABLE post(
     userID INTEGER,
     FOREIGN KEY (userID) REFERENCES users (id)
 );
--- create TABLE img(
---     id SERIAL PRIMARY KEY,
---     postID INTEGER,
---     img VARCHAR,
---     FOREIGN KEY (postID) REFERENCES post (id)
--- );
+
 create TABLE comments(
     id SERIAL PRIMARY KEY,
     userID INTEGER,
@@ -35,3 +30,11 @@ create TABLE likes(
     FOREIGN KEY (postID) REFERENCES post (id),
     FOREIGN KEY (userID) REFERENCES users (id) 
 );
+create TABLE answer(
+    id SERIAL PRIMARY KEY,
+    userID INTEGER,
+    content VARCHAR(255),
+    commentID INTEGER,
+    FOREIGN KEY (commentID) REFERENCES comments (id),
+    FOREIGN KEY (userID) REFERENCES users (id) 
+)
