@@ -22,7 +22,7 @@ class authUser {
                 await db.query('INSERT INTO users(name, password, email) values($1, $2, $3) RETURNING *', [name, hashPassword, email])
                 return res.status(200).json({success: true})
             } else {
-                return res.status(400).json({success: false, errorMessage: "Почта уже зарегистрирована"})
+                return res.status(400).json({success: false, errorMessage: "Еmail is already in use!"})
             }
         } catch (e) {
             res.status(500).json(e)

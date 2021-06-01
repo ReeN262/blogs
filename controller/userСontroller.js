@@ -33,7 +33,7 @@ class UserController {
                 await bd.query('DELETE FROM users where id = $1', [req.user.id])
                 res.status(200).json({success: true})  
             } else {
-                res.status(400).json({success: false, errorMessage: 'Пользователь не найден'})
+                res.status(400).json({success: false, errorMessage: 'User is not found!'})
             }
         } catch(e) {
             return res.status(500).json(e)
