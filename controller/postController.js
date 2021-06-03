@@ -61,6 +61,27 @@ class post {
             res.status(500).json(e)
         }
     }
+    async info(req, res) {
+        try {
+            let limit = req.query.limit ? req.query.limit : 15;
+            const post = await db.query(`SELECT post.*, users.name , COUNT(likes.userID) AS likes
+            FROM (((post INNER JOIN users ON post.userID = users.id) 
+            LEFT JOIN likes ON post.id = likes.postID)
+            GROUP BY post.id, users.name
+            ORDER BY create_date DESC limit $1`, [limit])
+            let blogs = [];
+            for(let i=0; i < post.rowCount; i++) {
+                let create_date = moment(post.rows[i].create_date).format('YYYY-MM-DD HH:mm:ss')
+                let content = post.rows[i].content.substr(0,69)+'...';
+                blogs[i] = {
+                    author: post.rows[i].name,title: post.rows[i].title, content: content, create_date: create_date, img: post.rows[i].img, likes: post.rows[i].likes
+                } 
+            }
+            return res.status(200).json(blogs)
+        } catch(e) {
+            res.status(500).json(e)
+        }
+    }
     async postLike(req, res) {
         try {
             const postID = req.params.id
@@ -79,32 +100,13 @@ class post {
         }
     }
 
-    async info(req, res) {
-        try {
-            const post = await db.query(`SELECT post.*, users.name, COUNT(likes.userID) AS likes 
-            FROM ((post INNER JOIN users ON post.userID = users.id) 
-            LEFT JOIN likes ON post.id = likes.postID) 
-            GROUP BY post.id, users.name
-            ORDER BY create_date DESC limit 15`)
-            let blogs = [];
-            for(let i=0; i < post.rowCount; i++) {
-                let create_date = moment(post.rows[i].create_date).format('YYYY-MM-DD HH:mm:ss')
-                let content = post.rows[i].content.substr(0,69)+'...';
-                blogs[i] = {
-                    author: post.rows[i].name,title: post.rows[i].title, content: content, create_date: create_date, likes: post.rows[i].likes
-                } 
-            }
-            return res.status(200).json(blogs)
-        } catch(e) {
-            res.status(500).json(e)
-        }
-    }
     async newComments(req, res){
         try {
             const {postID, content} = req.body
             if (!postID || !content) return res.status(400).json({success: false, errorMessage: 'Fields are empty'})
             if (content.length > 255) return res.status(400).json({success: false, errorMessage: 'Comment must not exceed 255 characters'})
-            const result = await db.query('INSERT INTO comments(userID, postID, content) values($1, $2, $3)', [req.user.id, postID, content])
+            const dates = moment().format('YYYY-MM-DD HH:mm:ss')
+            const result = await db.query('INSERT INTO comments(userID, postID, content, create_date) values($1, $2, $3, $4)', [req.user.id, postID, content, dates])
             if (result) return res.status(200).json({success: true})
             else return res.status(400).json({success: false})
         } catch(e) {
@@ -114,11 +116,76 @@ class post {
     async answerComment(req, res) {
         try {
             const {commentID, content} = req.body
-            if (!postID || !content) return res.status(400).json({success: false, errorMessage: 'Fields are empty'})
+            if (!commentID || !content) return res.status(400).json({success: false, errorMessage: 'Fields are empty'})
             if (content.length > 255) return res.status(400).json({success: false, errorMessage: 'Answer must not exceed 255 characters'})
-            const result = await db.query('INSERT INTO answer(userID, commnetID, content) values($1, $2, $3)', [req.user.id, commentID, content])
+            const dates = moment().format('YYYY-MM-DD HH:mm:ss')
+            const result = await db.query('INSERT INTO answer(userID, commentID, content, create_date) values($1, $2, $3, $4)', [req.user.id, commentID, content, dates])
             if (result) return res.status(200).json({success: true})
             else return res.status(400).json({success: false})
+        } catch(e) {
+            res.status(500).json(e)
+        }
+    }
+    async commentLike(req, res) {
+        try {
+            const commentID = req.params.id
+            let query = await db.query('select * from comments_likes where postID = $1 and userID = $2', [commentID, req.user.id])
+            if (query.rows.length == 0) {
+                //add like
+                await db.query('INSERT INTO from comments_likes(commentsID, userID) values($1, $2)', [commentID, req.user.id])
+                return res.status(200).json({success: true, like: true})
+            } else {
+                //remove like
+                await db.query('DELETE FROM from comments_likes WHERE commentsID = $1 and userID = $2', [commentID, req.user.id])
+                return res.status(200).json({success: true, like: false})
+            }
+        } catch(e) {
+            res.status(500).json(e)
+        }
+    }
+    async getComments(req, res) {
+        try {
+            const postID = req.params.postID
+            let comments = []
+            if (!postID) return res.status(400).json({success: false, errorMessage: 'invalid post ID'})
+            const post = await db.query(`SELECT comments.*,users.name , COUNT(comments_likes.userID) AS likes
+            FROM (((comments INNER JOIN users ON comments.userID = users.id) 
+            LEFT JOIN comments_likes ON comments.id = comments_likes.commentsID)
+            LEFT JOIN post ON comments.postID = post.id)
+            where post.id = $1
+            GROUP BY comments.id, users.name
+            ORDER BY comments.id ASC`, [postID])
+            if (post) {
+                for(let i=0; i < post.rowCount; i++) {
+                    let create_date = moment(post.rows[i].create_date).format('YYYY-MM-DD HH:mm:ss')
+                    comments[i] = {
+                        author: post.rows[i].name, content: post.rows[i].content,date: create_date, likes: post.rows[i].likes
+                    } 
+                }
+                res.status(200).json(comments)
+            }
+        } catch(e) {
+            res.status(500).json(e)
+        }
+    }
+    async getAnswers(req, res) {
+        try {
+            const commentID = req.params.commentID
+            let answers = []
+            if (!commentID) return res.status(400).json({success: false, errorMessage: 'invalid comment ID'})
+            const answer = await db.query(`SELECT answer.*, users.name
+            from answer, users, comments
+            where answer.userID = users.id and answer.commentID = comments.id and comments.id = $1
+            ORDER BY create_date ASC`, [commentID])
+            if (answer) {
+                for(let i=0; i < answer.rowCount; i++) {
+                    let create_date = moment(answer.rows[i].create_date).format('YYYY-MM-DD HH:mm:ss')
+                    answers[i] = {
+                        author: answer.rows[i].name, content: answer.rows[i].content,date: create_date
+                    } 
+                }
+                res.status(200).json(answers)
+            }
         } catch(e) {
             res.status(500).json(e)
         }

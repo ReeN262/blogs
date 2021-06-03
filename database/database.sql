@@ -18,6 +18,7 @@ create TABLE post(
 create TABLE comments(
     id SERIAL PRIMARY KEY,
     userID INTEGER,
+    create_date timestamp
     content VARCHAR(255),
     postID INTEGER,
     FOREIGN KEY (postID) REFERENCES post (id),
@@ -35,6 +36,14 @@ create TABLE answer(
     userID INTEGER,
     content VARCHAR(255),
     commentID INTEGER,
+    create_date timestamp
     FOREIGN KEY (commentID) REFERENCES comments (id),
     FOREIGN KEY (userID) REFERENCES users (id) 
 )
+create TABLE comments_likes(
+    id SERIAL PRIMARY KEY,
+    userID INTEGER,
+    commentsID INTEGER,
+    FOREIGN KEY (commentsID) REFERENCES comments (id),
+    FOREIGN KEY (userID) REFERENCES users (id) 
+);
