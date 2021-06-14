@@ -12,5 +12,78 @@ const knex = require('knex')({
     },
   },
 );
+try {
+  await knex.schema
+  .createTable('users', table => {
+    table.increments('id');
+    table.string('name');
+    table.string('email');
+    table.string('password');
+  })
+  .createTable('post', table => {
+    table.increments('id');
+    table.string('title');
+    table.string('content');
+    table.string('create_date');
+    table.string('update_date');
+    table.string('img');
+    table
+      .integer('userid')
+      .unsigned()
+      .references('users.id');
+  })
+  .createTable('comments', table => {
+    table.increments('id');
+    table.string('content');
+    table.string('create_date');
+    table
+      .integer('userid')
+      .unsigned()
+      .references('users.id');
+    table
+      .integer('postid')
+      .unsigned()
+      .references('postid.id');
+  })
+  .createTable('likes', table => {
+    table.increments('id');
+    table
+      .integer('userid')
+      .unsigned()
+      .references('users.id');
+    table
+      .integer('postid')
+      .unsigned()
+      .references('postid.id');
+  })
+  .createTable('answer', table => {
+    table.increments('id');
+    table.string('content');
+    table.string('create_date');
+    table
+      .integer('userid')
+      .unsigned()
+      .references('users.id');
+    table
+      .integer('commentid')
+      .unsigned()
+      .references('postid.id');
+  })
+  .createTable('comments_likes', table => {
+    table.increments('id');
+    table
+      .integer('userid')
+      .unsigned()
+      .references('users.id');
+    table
+      .integer('commentsID')
+      .unsigned()
+      .references('comments.id');
+  })
+} catch(e){
+  console.log(e);
+}
+
+
 module.exports = knex
 
