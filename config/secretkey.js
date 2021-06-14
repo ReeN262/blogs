@@ -1,3 +1,3 @@
 module.exports = {
-    secret: "fdFas54&223$%"
+    secret: "1"
 }

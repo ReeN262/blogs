@@ -1,17 +1,27 @@
-const Router = require('express')
-const router = new Router()
-const authController = require('../controller/authController')
-const { check} = require('express-validator');
+const Router = require('express');
+const { check } = require('express-validator');
 
+const authController = require('../controller/authController');
 
-router.post('/register', [
+const router = new Router();
+
+router.post(
+  '/register', 
+  [
     check('name', 'Username must be between 4 and 20 characters').isLength({min: 4, max: 20}),
-    check('email', 'Invalid email').isEmail()
-], authController.registerUser)
-router.post('/login', [ 
-    check('name', 'Username must be between 4 and 20 characters').isLength({min: 4, max: 20}),
-    check('email', 'Invalid email').isEmail()
-],authController.authorizationUser)
+    check('email', 'Invalid email').isEmail(),
+    check('password').isLength({'min': 4})
+  ], 
+  authController.registerUser
+);
+router.post(
+  '/login',
+  [ 
+    check('email', 'Invalid email').isEmail(),
+    check('password').isLength({'min': 4})
+  ],
+  authController.authorizationUser
+);
 
 
-module.exports = router
+module.exports = router;
